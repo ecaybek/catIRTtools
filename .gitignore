@@ -44,3 +44,7 @@ rsconnect/
 *.xls
 *.xlsx
 *.dat
+
+# Experimental files
+
+app.R

@@ -1,3 +1,7 @@
+library(shiny)
+library(shinythemes)
+library(shinyjs)
+
 ui <- navbarPage(
   title = "catIRT Tools", theme = shinytheme("flatly"),
   ## CAT Simulations
@@ -25,8 +29,16 @@ ui <- navbarPage(
           column(6, selectInput("est_method", "Theta Estimation", c("ML", "WL", "EAP", "ROB"), "EAP")),
           column(6, selectInput("const_d", "Scaling (D)", c("1.702", "1.000"), "1.702"))
         ),
-        numericInput("ter_min_item", "Minimum item to apply", 3),
-        numericInput("ter_se", "Maximum standard error to stop the test", 0.40),
+        checkboxInput("ter_type", "Fixed Length Termination Rule?"),
+        div(
+          id = "ter_fixed",
+          numericInput("ter_fixed_item", "How many items should be administered?", 5)
+        ),
+        shinyjs::hidden(div(
+          id = "ter_var",
+          numericInput("ter_min_item", "Minimum item to apply", 3),
+          numericInput("ter_se", "Maximum standard error to stop the test", 0.40)
+        )),
         numericInput("seed", "Please enter seed in order to reproduce your results", 26),
         fluidRow(
           column(6, checkboxInput("generate_item", "Generate item parameters?", FALSE)),
@@ -124,7 +136,8 @@ ui <- navbarPage(
   ## Help
   tabPanel(
     "Help",
-    p(strong("Help"))
+    p(strong("Help")),
+    div(p("This is a demo app. If you have any question please contact: ecaybek {at} gmail.com"))
   ),
   
   ## Privacy
