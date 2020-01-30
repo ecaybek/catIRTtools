@@ -48,3 +48,4 @@ rsconnect/
 # Experimental files
 
 app.R
+*.zip

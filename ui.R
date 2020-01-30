@@ -3,7 +3,7 @@ library(shinythemes)
 library(shinyjs)
 
 ui <- navbarPage(
-  title = "catIRT Tools", theme = shinytheme("flatly"),
+  title = "catIRTtools", theme = shinytheme("flatly"),
   ## CAT Simulations
   tabPanel(
     "CAT Simulation",
@@ -29,16 +29,8 @@ ui <- navbarPage(
           column(6, selectInput("est_method", "Theta Estimation", c("ML", "WL", "EAP", "ROB"), "EAP")),
           column(6, selectInput("const_d", "Scaling (D)", c("1.702", "1.000"), "1.702"))
         ),
-        checkboxInput("ter_type", "Fixed Length Termination Rule?"),
-        div(
-          id = "ter_fixed",
-          numericInput("ter_fixed_item", "How many items should be administered?", 5)
-        ),
-        shinyjs::hidden(div(
-          id = "ter_var",
-          numericInput("ter_min_item", "Minimum item to apply", 3),
-          numericInput("ter_se", "Maximum standard error to stop the test", 0.40)
-        )),
+        numericInput("ter_min_item", "Minimum item to apply", 3),
+        numericInput("ter_se", "Maximum standard error to stop the test", 0.40),
         numericInput("seed", "Please enter seed in order to reproduce your results", 26),
         fluidRow(
           column(6, checkboxInput("generate_item", "Generate item parameters?", FALSE)),
@@ -51,7 +43,11 @@ ui <- navbarPage(
         ),
         shinyjs::hidden(div(
           id = "upload_item",
-          fileInput("file_par", "File for Item Parameters"),
+          fileInput("file_par", "File for Item Parameters",
+                    multiple = TRUE,
+                    accept = c("text/csv",
+                               "text/comma-separated-values,text/plain",
+                               ".csv")),
           fluidRow(
             column(6, radioButtons("sep_par", "Seperator for File", c(Semicolon = ";", Comma = ","))),
             column(6, checkboxInput("header_par", "First row as header", TRUE))
@@ -61,7 +57,11 @@ ui <- navbarPage(
         div(id = "theta_inc", selectInput("increment", "Please select the theta increment", c(0.5, 0.1, 0.05, 0.01), 0.1)),
         shinyjs::hidden(div(
           id = "upload_res",
-          fileInput("file_res", "File for Responses"),
+          fileInput("file_res", "File for Responses",
+                    multiple = TRUE,
+                    accept = c("text/csv",
+                               "text/comma-separated-values,text/plain",
+                               ".csv")),
           fluidRow(
             column(6, radioButtons("sep_res", "Seperator for File", c(Semicolon = ";", Comma = ","))),
             column(6, checkboxInput("header_res", "First row as header", TRUE))
@@ -99,7 +99,11 @@ ui <- navbarPage(
     sidebarLayout(
       ### Sidebar
       sidebarPanel(
-        fileInput("mirt_res", "File for responses"),
+        fileInput("mirt_res", "File for responses",
+                  multiple = TRUE,
+                  accept = c("text/csv",
+                             "text/comma-separated-values,text/plain",
+                             ".csv")),
         checkboxInput("ispoly", "Polytomous Items?", FALSE),
         selectInput("mirt_poly", "IRT Model", c("GRM" = "graded", "GPCM" = "gpcm"), "GRM"),
         shinyjs::hidden(div(
@@ -135,9 +139,11 @@ ui <- navbarPage(
   
   ## Help
   tabPanel(
-    "Help",
-    p(strong("Help")),
-    div(p("This is a demo app. If you have any question please contact: ecaybek {at} gmail.com"))
+    "Sample Files",
+    p(strong("You can find item parameter and response sample files below.")),
+    div(p("This is a demo app. If you have any question please contact: author {at} author.com")),
+    div(a(href = "https://eptlab.com/itempar.csv", "Item parameter sample file")),
+    div(a(href = "https://eptlab.com/responses.csv", "Response pattern sample file"))
   ),
   
   ## Privacy
