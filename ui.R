@@ -9,7 +9,7 @@ ui <- navbarPage(
     "CAT Simulation",
     
     tags$head(tags$style(HTML("
-                  .selectize-input, .selectize-dropdown, .control-label, .form-control, label {
+                  .selectize-input, .selectize-dropdown, .control-label,  .form-control, label {
                             font-size: 100%;
                   }
                   .shiny-file-input-progress {
@@ -29,20 +29,64 @@ ui <- navbarPage(
           column(6, selectInput("est_method", "Theta Estimation", c("ML", "WL", "EAP", "ROB"), "EAP")),
           column(6, selectInput("const_d", "Scaling (D)", c("1.702", "1.000"), "1.702"))
         ),
-        numericInput("ter_min_item", "Minimum item to apply", 3),
-        numericInput("ter_se", "Maximum standard error to stop the test", 0.40),
-        numericInput("seed", "Please enter seed in order to reproduce your results", 26),
         fluidRow(
-          column(6, checkboxInput("generate_item", "Generate item parameters?", FALSE)),
-          column(6, checkboxInput("generate_response", "Generate responses?", FALSE))
+          column(7, HTML('Do not terminate the test before applying')),
+          column(3, numericInput("ter_min_item", NULL, 3, min = 1)),
+          column(2, HTML('items'))
+        ),
+        p(HTML('<b>Termination Criteria</b>')),
+        fluidRow(
+          column(6, checkboxInput("cb_ter_fixed", "Fixed", FALSE)),
+          column(6, checkboxInput("cb_ter_var", "Variable", FALSE))
         ),
         div(
-          id = "div_itemno",
-          numericInput("item_no", "How many items to generate?", 10),
-          numericInput("item_cat", "Categories", 5)
+          id = "ter_fixed",
+            numericInput("ter_length", "Test Length", 10, width = "50%")
+          ),
+        div(
+          id = "ter_var",
+          numericInput("ter_se", "SE", 0.40, width = "50%")
         ),
-        shinyjs::hidden(div(
-          id = "upload_item",
+        fluidRow(
+          column(6, numericInput("seed", "Seed", 26)),
+          column(6, numericInput("replicate", "Replication(s)", 1))
+          ),
+        p(HTML('<b>Generate</b>')),
+        fluidRow(
+          column(4, checkboxInput("generate_item", "Item parameters", FALSE)),
+          column(4, checkboxInput("generate_theta", "Theta values", FALSE)),
+          column(4, checkboxInput("generate_response", "Responses", FALSE))
+        ),
+        div(
+          id = "gen_item",
+          fluidRow(
+            column(6, numericInput("item_no", "How many items to generate?", 10, min = 1)),
+            column(6, numericInput("item_cat", "Categories", 5, min = 2))
+          )
+        ),
+        div(
+          id = "gen_res",
+          fluidRow(
+            column(4, numericInput("min_theta", "Min Theta", -3.0)),
+            column(4, numericInput("max_theta", "Max Theta", 3.0)),
+            column(4, numericInput("increment", "Theta Increment", 0.10))
+          )),
+        div(
+          id = "gen_theta",
+          fluidRow(
+            column(4, numericInput("theta_gen_mean", "Mean", 0)),
+            column(4, numericInput("theta_gen_sd", "SD", 1)),
+            column(4, numericInput("theta_gen_n", "Sample Size", 100))
+          )),
+        br(),
+        p(HTML('<b>Upload</b>')),
+        fluidRow(
+          column(4, checkboxInput("upload_item", "Item parameters", FALSE)),
+          column(4, checkboxInput("upload_theta", "Theta values", FALSE)),
+          column(4, checkboxInput("upload_response", "Responses", FALSE))
+        ),
+        div(
+          id = "up_item",
           fileInput("file_par", "File for Item Parameters",
                     multiple = TRUE,
                     accept = c("text/csv",
@@ -52,11 +96,9 @@ ui <- navbarPage(
             column(6, radioButtons("sep_par", "Seperator for File", c(Semicolon = ";", Comma = ","))),
             column(6, checkboxInput("header_par", "First row as header", TRUE))
           )
-        )),
-        br(),
-        div(id = "theta_inc", selectInput("increment", "Please select the theta increment", c(0.5, 0.1, 0.05, 0.01), 0.1)),
-        shinyjs::hidden(div(
-          id = "upload_res",
+        ),
+        div(
+          id = "up_res",
           fileInput("file_res", "File for Responses",
                     multiple = TRUE,
                     accept = c("text/csv",
@@ -66,13 +108,31 @@ ui <- navbarPage(
             column(6, radioButtons("sep_res", "Seperator for File", c(Semicolon = ";", Comma = ","))),
             column(6, checkboxInput("header_res", "First row as header", TRUE))
           )
-        )),
+        ),
+        div(
+          id = "up_theta",
+          fileInput("file_theta", "File for Theta",
+                    multiple = TRUE,
+                    accept = c("text/csv",
+                               "text/comma-separated-values,text/plain",
+                               ".csv")),
+          fluidRow(
+            column(6, radioButtons("sep_res", "Seperator for File", c(Semicolon = ";", Comma = ","))),
+            column(6, checkboxInput("header_res", "First row as header", TRUE))
+          )
+        ),
+        p(strong("Options for Output Save")),
+        fluidRow(
+          column(6, selectInput("out_sep", "Seperator for CSV", c(";", ",", "|"), ";")),
+          column(6, selectInput("out_dec_sep", "Decimal Mark for CSV", c(".", ","), ".")),
+        ),
         actionButton("submit", "Submit")
       ),
       ### Results
       mainPanel(
         div(id = "results", print("Your results will be here after you submit your request")),
         dataTableOutput("results_cat"),
+        dataTableOutput("results_rep"),
         shinyjs::hidden(div(
           id = "results_all",
           print(p(strong("YOU CAN DOWNLOAD THE DATA & THE RESULTS BELOW."))),
@@ -81,12 +141,6 @@ ui <- navbarPage(
             column(4, downloadButton("download_res", "Responses")),
             column(4, downloadButton("download_sim", "Simulation Results"))
           ),
-          br(),
-          fluidRow(
-            column(4, downloadButton("download_items_comma", "Item Parameters (with Comma)")),
-            column(4, downloadButton("download_res_comma", "Responses (with Comma)")),
-            column(4, downloadButton("download_sim_comma", "Simulation Results (with Comma)"))
-          )
         ))
       )
     )
@@ -121,6 +175,11 @@ ui <- navbarPage(
           print(p(strong("Yen's Q3 Statistics for Local Independency"))),
           dataTableOutput("results_mirt"),
           print(p(strong("You can download results below"))),
+          print(p(strong("Download Options"))),
+          fluidRow(
+            column(4, textInput("out_sep", "Seperator", ";")),
+            column(4, textInput("out_dec_sep", "Decimal Seperator", "."))
+          ),
           fluidRow(
             column(4, downloadButton("download_mirt_par", "Download Item Parameters")),
             column(4, downloadButton("download_mirt_theta", "Download Theta Estimates"))
