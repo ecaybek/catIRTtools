@@ -1,11 +1,7 @@
 library(catR)
 library(plyr)
 library(mirt)
-# library(data.table)
-# library(stringr)
-# library(DT)
 
-  
 server <- function(input, output, session) {
   
   #### CAT SIMULATIONS ########################################################
@@ -67,6 +63,8 @@ server <- function(input, output, session) {
         min = 1,
         max = 1
       )
+    } else {
+      
     }
   })
   

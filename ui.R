@@ -5,9 +5,7 @@ library(shinyjs)
 ui <- navbarPage(
   title = "catIRTtools", theme = shinytheme("spacelab"),
   ## CAT Simulations
-  tabPanel(
-    "CAT Simulation",
-    
+  tabPanel("CAT Simulation",
     tags$head(tags$style(HTML("
                   .selectize-input, .selectize-dropdown, .control-label,  .form-control, label {
                             font-size: 100%;
@@ -80,7 +78,7 @@ ui <- navbarPage(
                                "text/comma-separated-values,text/plain",
                                ".csv")),
           fluidRow(
-            column(6, radioButtons("sep_par", "Seperator for File", c(Semicolon = ";", Comma = ","))),
+            column(6, radioButtons("sep_par", "Seperator for File", c("Semicolon" = ";", "Comma" = ","))),
             column(6, checkboxInput("header_par", "First row as header", TRUE))
           )
         ),
@@ -111,7 +109,7 @@ ui <- navbarPage(
         p(strong("Options for Output Save")),
         fluidRow(
           column(6, selectInput("out_sep", "Seperator for CSV", c(";", ",", "|"), ";")),
-          column(6, selectInput("out_dec_sep", "Decimal Mark for CSV", c(".", ","), ".")),
+          column(6, selectInput("out_dec_sep", "Decimal Mark for CSV", c(".", ","), "."))
         ),
         actionButton("submit", "Submit")
       ),
@@ -130,7 +128,7 @@ ui <- navbarPage(
             column(3, downloadButton("download_res", "Responses")),
             column(3, downloadButton("download_sim", "Simulation Results")),
             column(3, downloadButton("download_cond", "Conditional Results"))
-          ),
+          )
         ))
       )
     )
@@ -158,7 +156,7 @@ ui <- navbarPage(
         p(strong("Options for Output Save")),
         fluidRow(
           column(6, selectInput("mirt_out_sep", "Seperator for CSV", c(";", ",", "|"), ";")),
-          column(6, selectInput("mirt_out_dec_sep", "Decimal Mark for CSV", c(".", ","), ".")),
+          column(6, selectInput("mirt_out_dec_sep", "Decimal Mark for CSV", c(".", ","), "."))
         ),
         actionButton("mirt_calibrate", "Calibration & Estimation")
       ),
