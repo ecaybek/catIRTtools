@@ -37,3 +37,4 @@ app.R
 *.zip
 temp.R
 to-do.R
+temp/
