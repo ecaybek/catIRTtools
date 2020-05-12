@@ -20,12 +20,14 @@ ui <- navbarPage(
     sidebarLayout(
       sidebarPanel(
         fluidRow(
-          column(6, selectInput("irt_model", "IRT model", c("1PL", "2PL", "3PL", "4PL", "GRM", "MGRM", "PCM", "GPCM", "RSM", "NRM"), "GRM")),
-          column(6, selectInput("item_sel_method", "Item Selection", c("MFI", "MEI", "MLWI", "MPWI", "MEPV", "Random" = "random"), "MFI"))
+          column(4, selectInput("irt_model", "IRT model", c("1PL", "2PL", "3PL", "4PL", "GRM", "MGRM", "PCM", "GPCM", "RSM", "NRM"), "GRM")),
+          column(4, selectInput("item_sel_method", "Item Selection", c("MFI", "MEI", "MLWI", "MPWI", "MEPV", "Random" = "random"), "MFI")),
+          column(4, selectInput("est_method", "Theta Estimation", c("ML", "BM", "EAP", "WL", "ROB"), "BM"))
         ),
         fluidRow(
-          column(6, selectInput("est_method", "Theta Estimation", c("ML", "WL", "EAP", "ROB"), "EAP")),
-          column(6, selectInput("const_d", "Scaling (D)", c("1.702", "1.000"), "1.702"))
+          column(4, selectInput("const_d", "Scaling (D)", c("1.702", "1.000"), "1.702")),
+          column(4, selectInput("first_item", "First Item", c("Theta = 0" = "0", "Random Theta" = "random"))),
+          column(4, numericInput("exp_ctrl", "Max Item Exposure Rate", 0.4, min = 0, max = 1, step = 0.1))
         ),
         fluidRow(
           column(6, selectInput("cb_ter", "Termination Criteria", c("Variable", "Fixed"), "Variable")),
@@ -125,7 +127,7 @@ ui <- navbarPage(
           print(p(strong("YOU CAN DOWNLOAD THE DATA & THE RESULTS BELOW."))),
           fluidRow(
             column(3, downloadButton("download_items", "Item Parameters")),
-            column(3, downloadButton("download_res", "Responses")),
+            column(3, downloadButton("download_res", "Full Responses")),
             column(3, downloadButton("download_sim", "Simulation Results")),
             column(3, downloadButton("download_cond", "Conditional Results"))
           )

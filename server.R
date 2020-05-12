@@ -93,10 +93,12 @@ server <- function(input, output, session) {
     ThetaM <- input$theta_gen_mean
     ThetaSd <- input$theta_gen_sd
     ConstD <- as.numeric(input$const_d)
-    if(!is.na(Replica > 1)){
-      Seed <- NULL
-    } else {
+    ExpCtrl <- input$exp_ctrl
+    if(Replica == 1){
       Seed <- input$seed
+    }
+    else if(Replica > 1){
+      Seed <- NULL
     }
     ItemPool <- NULL
     Responses <- NULL
@@ -192,7 +194,11 @@ server <- function(input, output, session) {
         }
    
     ## Simulation
-    StartList <- list(theta = 0)
+    if(input$first_item == "0"){
+      StartList <- list(theta = 0, seed = Seed)
+    } else if(input$first_item == "random"){
+      StartList <- list(theta = -1:1, randomesque = 5, seed = Seed)
+    }
     TestList <- list(D = ConstD,
                      itemSelect = input$item_sel_method)
     if(input$cb_ter == "Fixed"){
@@ -217,9 +223,10 @@ server <- function(input, output, session) {
                        ItemPool,
                        Responses[[rep]],
                        model = IRTModel,
+                       rmax = ExpCtrl,
                        start = StartList,
                        test = TestList,
-                       stop = list(rule = "precision", thr = 0.4),
+                       stop = StopList,
                        final = list(D = ConstD)
                        )
                      }
@@ -260,8 +267,19 @@ server <- function(input, output, session) {
         TestLength = round(CAT[[rep]][["testLength"]], 4),
         MeanSE = round(mean(CAT[[rep]][["final.values.df"]][["final.SE"]]), 4)
         )
-      Conditional <- cbind(ReplicationID = rep(rep, 7),
-                           rbind(t(CAT[[rep]][["condTheta"]]),
+     
+      FirstCol <- c("Mean Theta",
+                    "RMSE",
+                    "Mean bias",
+                    "Mean test length",
+                    "Mean standard error",
+                    "Proportion stop rule satisfied",
+                    "Number of simulees")
+      
+      Conditional <- cbind(FirstCol, 
+                           ReplicationID = rep(rep, 7),
+                           rbind(
+                           t(CAT[[rep]][["condTheta"]]),
                            t(CAT[[rep]][["condRMSE"]]),
                            t(CAT[[rep]][["condBias"]]),
                            t(CAT[[rep]][["condnItems"]]),
@@ -269,16 +287,8 @@ server <- function(input, output, session) {
                            t(CAT[[rep]][["condthrOK"]]),
                            t(CAT[[rep]][["ndecile"]])
                            ))
-      colnames(Conditional) <- c("ReplicationID", "D1", "D2", "D3", "D4", "D5",
+      colnames(Conditional) <- c("Statistics", "ReplicationID", "D1", "D2", "D3", "D4", "D5",
                                  "D6", "D7", "D8", "D9", "D10")
-      
-      row.names(Conditional) <- c("Mean Theta",
-                                  "RMSE",
-                                  "Mean bias",
-                                  "Mean test length",
-                                  "Mean standard error",
-                                  "Proportion stop rule satisfied",
-                                  "Number of simulees")
       
       oConditional <- rbind(oConditional, Conditional)
       oSummary <- rbind(oSummary, Summary)
@@ -319,7 +329,8 @@ server <- function(input, output, session) {
           file,
           dec = OutDecSep,
           sep = OutSep,
-          row.names = FALSE)
+          row.names = FALSE,
+          quote = FALSE)
       }
     )
     
@@ -362,7 +373,8 @@ server <- function(input, output, session) {
           file,
           dec = OutDecSep,
           sep = OutSep,
-          row.names = TRUE
+          row.names = FALSE,
+          quote = FALSE
         )
       }
     )
@@ -379,15 +391,16 @@ server <- function(input, output, session) {
   observeEvent(input$mirt_calibrate, {
     mirtData <- read.csv(input$mirt_res$datapath,
                          header = TRUE,
-                         sep = ";"
+                         sep = ";",
+                         na.strings = "NA"
     )
     mirtModel <- input$mirt_model
     mirtEst <- input$mirt_est
     mirtD <- input$mirt_D
     mirtCalib <- mirt(mirtData, itemtype = mirtModel, 1, D = mirtD)
     mirtItemPar <- coef(mirtCalib, IRTpars = T, simplify = T)
-    mirtItemFit <- itemfit(mirtCalib)
-    mirtTheta <- fscores(mirtCalib, method = mirtEst, D = mirtD)
+    mirtItemFit <- itemfit(mirtCalib, na.rm = TRUE)
+    mirtTheta <- fscores(mirtCalib, method = mirtEst, D = mirtD, na.rm = TRUE)
     mirtQ3 <- residuals(mirtCalib, df.p = T, type = "Q3", Theta = mirtTheta, suppress = .37)
     mirtThetaP <- data.frame(RespondentID = c(1:nrow(mirtTheta)), Theta = mirtTheta)
     
