@@ -4,6 +4,9 @@ library(mirt)
 
 server <- function(input, output, session) {
   
+  addTooltip(session, id = "exp_ctrl", title = "Don't set this value low for small item pool sizes.",
+             placement = "left", trigger = "hover")
+  
   #### CAT SIMULATIONS ########################################################
   #############################################################################
   

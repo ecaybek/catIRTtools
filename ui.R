@@ -1,6 +1,7 @@
 library(shiny)
 library(shinythemes)
 library(shinyjs)
+library(shinyBS)
 
 ui <- navbarPage(
   title = "catIRTtools", theme = shinytheme("spacelab"),
@@ -19,24 +20,28 @@ ui <- navbarPage(
     ### Sidebar
     sidebarLayout(
       sidebarPanel(
+        bsTooltip(id = "exp_ctrl", title = "You'll get disconnect if you have small item pool size.", 
+                  placement = "left", trigger = "hover"),
+        
         fluidRow(
           column(4, selectInput("irt_model", "IRT model", c("1PL", "2PL", "3PL", "4PL", "GRM", "MGRM", "PCM", "GPCM", "RSM", "NRM"), "GRM")),
           column(4, selectInput("item_sel_method", "Item Selection", c("MFI", "MEI", "MLWI", "MPWI", "MEPV", "Random" = "random"), "MFI")),
-          column(4, selectInput("est_method", "Theta Estimation", c("ML", "BM", "EAP", "WL", "ROB"), "BM"))
+          column(4, selectInput("est_method", "Theta Estimation", c("ML", "MAP (BM)" = "BM", "EAP", "WL", "ROB"), "BM"))
         ),
         fluidRow(
           column(4, selectInput("const_d", "Scaling (D)", c("1.702", "1.000"), "1.702")),
           column(4, selectInput("first_item", "First Item", c("Theta = 0" = "0", "Random Theta" = "random"))),
-          column(4, numericInput("exp_ctrl", "Max Item Exposure Rate", 0.4, min = 0, max = 1, step = 0.1))
+          column(4, numericInput("exp_ctrl", "Max Item Exposure Rate", 1, min = 0, max = 1, step = 0.1))
         ),
         fluidRow(
-          column(6, selectInput("cb_ter", "Termination Criteria", c("Variable", "Fixed"), "Variable")),
-          column(6, numericInput("ter_length", "Test Length", 10, min = 1, step = 1)),
-          column(6, shinyjs::hidden(numericInput("ter_se", "SE", 0.40, min = 0, max = 1, step = 0.05)))
+          column(4, selectInput("cb_ter", "Termination Criteria", c("Variable", "Fixed"), "Variable")),
+          column(4, shinyjs::hidden(numericInput("ter_se", "SE", 0.40, min = 0, max = 1, step = 0.05))),
+          column(4, numericInput("ter_length", "Test Length", 10, min = 1, step = 1))
         ),
         fluidRow(
-          column(6, numericInput("seed", "Seed", 26, min = 1, step = 1)),
-          column(6, numericInput("rep", "Replication(s)", 1, min = 1, max = 500, step = 1))
+          column(4, numericInput("seed", "Seed", 26, min = 1, step = 1)),
+          column(4, numericInput("rep", "Replication(s)", 1, min = 1, max = 500, step = 1)),
+          column(4)
           ),
         p(HTML('<b>Generate</b>')),
         fluidRow(
@@ -153,7 +158,7 @@ ui <- navbarPage(
         shinyjs::hidden(div(
           id = "mirt_dicho",
           selectInput("mirt_dicho", "IRT Model", c("Rasch", "2PL", "3PL", "4PL"),"3PL"))),
-        selectInput("mirt_est", "Theta Estimation Method", c("EAP", "MAP", "ML", "WLE"), "EAP"),
+        selectInput("mirt_est", "Theta Estimation Method", c("EAP", "MAP", "ML", "WLE"), "MAP"),
         selectInput("mirt_D", "D", c("1.702", "1.000"), "1.702"),
         p(strong("Options for Output Save")),
         fluidRow(
@@ -195,3 +200,5 @@ ui <- navbarPage(
     p(strong("We do not keep any of the files and results on our servers."))
   )
 )
+
+
