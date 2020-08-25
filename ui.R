@@ -22,6 +22,8 @@ ui <- navbarPage(
       sidebarPanel(
         bsTooltip(id = "exp_ctrl", title = "You'll get disconnect if you have small item pool size.", 
                   placement = "left", trigger = "hover"),
+        bsTooltip(id = "seed", title = "Seed is not used when the replication > 1.", 
+                  placement = "bottom", trigger = "hover"),
         
         fluidRow(
           column(4, selectInput("irt_model", "IRT model", c("1PL", "2PL", "3PL", "4PL", "GRM", "MGRM", "PCM", "GPCM", "RSM", "NRM"), "GRM")),
@@ -158,8 +160,10 @@ ui <- navbarPage(
         shinyjs::hidden(div(
           id = "mirt_dicho",
           selectInput("mirt_dicho", "IRT Model", c("Rasch", "2PL", "3PL", "4PL"),"3PL"))),
-        selectInput("mirt_est", "Theta Estimation Method", c("EAP", "MAP", "ML", "WLE"), "MAP"),
-        selectInput("mirt_D", "D", c("1.702", "1.000"), "1.702"),
+        fluidRow(
+          column(6, selectInput("mirt_est", "Theta Estimation Method", c("EAP", "MAP", "ML", "WLE"), "MAP")),
+          column(6, selectInput("mirt_D", "D", c("1.702", "1.000"), "1.702"))),
+        numericInput("yensur", "Hide Yen's Q3 statistics below:", 0.37),
         p(strong("Options for Output Save")),
         fluidRow(
           column(6, selectInput("mirt_out_sep", "Seperator for CSV", c(";", ",", "|"), ";")),
@@ -173,7 +177,7 @@ ui <- navbarPage(
         shinyjs::hidden(div(
           id = "download_mirt_res",
           print(p(strong("Yen's Q3 Statistics for Local Independency"))),
-          dataTableOutput("results_mirt"),
+          DT::dataTableOutput("results_mirt", width = "80%", height = "auto"),
           print(p(strong("You can download results below"))),
           fluidRow(
             column(4, downloadButton("download_mirt_par", "Download Item Parameters")),

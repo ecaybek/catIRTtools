@@ -1,6 +1,7 @@
 library(catR)
 library(plyr)
 library(mirt)
+library(DT)
 
 server <- function(input, output, session) {
   
@@ -68,6 +69,27 @@ server <- function(input, output, session) {
       )
     } else {
       
+    }
+  })
+  
+  ## Disabling Seed if the Replication > 1
+  observeEvent(input$rep, {
+    if (input$rep > 1) {
+      updateNumericInput(
+        session,
+        inputId = "seed",
+        value = NA,
+        min = 0,
+        max = 0
+      )
+    } else if (input$rep == 1){
+      updateNumericInput(
+        session,
+        inputId = "seed",
+        value = 26,
+        min = 1,
+        step = 1
+      )
     }
   })
   
@@ -397,20 +419,24 @@ server <- function(input, output, session) {
                          sep = ";",
                          na.strings = "NA"
     )
-    mirtModel <- input$mirt_model
+    if(isTRUE(input$ispoly)){
+      mirtModel <- input$mirt_poly
+    } else {
+      mirtModel <- input$mirt_dicho
+    }
+    
     mirtEst <- input$mirt_est
     mirtD <- input$mirt_D
-    mirtCalib <- mirt(mirtData, itemtype = mirtModel, 1, D = mirtD)
+    mirtCalib <- mirt(mirtData, 1, itemtype = mirtModel, D = mirtD)
     mirtItemPar <- coef(mirtCalib, IRTpars = T, simplify = T)
     mirtItemFit <- itemfit(mirtCalib, na.rm = TRUE)
-    mirtTheta <- fscores(mirtCalib, method = mirtEst, D = mirtD, na.rm = TRUE)
-    mirtQ3 <- residuals(mirtCalib, df.p = T, type = "Q3", Theta = mirtTheta, suppress = .37)
+    mirtTheta <- fscores(mirtCalib, method = mirtEst, na.rm = TRUE)
+    mirtQ3 <- data.frame(residuals(mirtCalib, df.p = T, type = "Q3", Theta = mirtTheta, suppress = input$yensur))
+    rownames(mirtQ3) <- colnames(mirtData)
     mirtThetaP <- data.frame(RespondentID = c(1:nrow(mirtTheta)), Theta = mirtTheta)
     
-    output$results_mirt <- renderDataTable(
-      round(mirtQ3, 2),
-      options = list(scrollX = "600px",
-                     scrollY = "400px")
+    output$results_mirt <- DT::renderDataTable(
+      round(mirtQ3, 2)
     )
     output$results_mirt_item_infotrace <- renderPlot({
       itemplot(mirtCalib, 1, type = "infotrace")
