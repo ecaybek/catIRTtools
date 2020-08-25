@@ -133,10 +133,11 @@ ui <- navbarPage(
           id = "results_all",
           print(p(strong("YOU CAN DOWNLOAD THE DATA & THE RESULTS BELOW."))),
           fluidRow(
-            column(3, downloadButton("download_items", "Item Parameters")),
-            column(3, downloadButton("download_res", "Full Responses")),
-            column(3, downloadButton("download_sim", "Simulation Results")),
-            column(3, downloadButton("download_cond", "Conditional Results"))
+            column(2, downloadButton("download_items", "Item Parameters")),
+            column(2, downloadButton("download_res", "Full Responses")),
+            column(2, downloadButton("download_sim", "Simulation Results")),
+            column(2, downloadButton("download_cond", "Conditional Results")),
+            column(2, downloadButton("download_summary", "Summary"))
           )
         ))
       )

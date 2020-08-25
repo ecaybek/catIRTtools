@@ -344,6 +344,28 @@ server <- function(input, output, session) {
     ## File Downloaders
     OutSep <- input$out_sep
     OutDecSep <- input$out_dec_sep
+    
+    output$download_summary <- downloadHandler(
+      filename = function() {
+        "CATSummary.txt"
+      },
+      content = function(file) {
+        if(Replica > 1){
+          sink(file, type = "output")
+          for(i in 1:Replica){
+            writeLines(paste0("\n ####### REPLICA NO: ", i, " #######"))
+            print(CAT[[i]])
+          }
+          sink()
+        } else {
+          sink(file, type = "output")
+          print(CAT[[1]])
+          sink()
+        }
+
+      }
+    )
+  
     output$download_items <- downloadHandler(
       filename = function() {
         "itempar.csv"
