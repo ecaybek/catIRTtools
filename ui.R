@@ -194,7 +194,7 @@ ui <- navbarPage(
   tabPanel(
     "Sample Files",
     p(strong("You can find item parameter and response sample files below.")),
-    div(p("This is a demo app. If you have any question please contact: author {at} author.com")),
+    div(p("This is a demo app. If you have any question please contact: erencan {at} aybek.net")),
     div(a(href = "https://eptlab.com/itempar.csv", "Item parameter sample file")),
     div(a(href = "https://eptlab.com/responses.csv", "Response pattern sample file"))
   ),
@@ -203,6 +203,27 @@ ui <- navbarPage(
   tabPanel(
     "Privacy",
     p(strong("We do not keep any of the files and results on our servers."))
+  ),
+  
+  ## References & Citation
+  tabPanel(
+    "References & Citation",
+    p(strong("References")),
+    div(p(
+      "Chalmers, R.P. (2012). mirt: A multidimensional item response theory package for the R environment. Journal of Statistical Software, 48(6), 1-29. doi:10.18637/jss.v048.i06")),
+    div(p("Magis, D. & Raiche, G. (2012). Random generation of response 
+          patterns under computerized adaptive testing with the R package 
+          catR. Journal of Statistical Software, 48(8), 1-31. 
+          doi:10.18637/jss.v048.i08")),
+    div(p("Magis, D. & Barrada, J.R. (2017). Computerized adaptive testing 
+          with R: Recent updates of the package catR. Journal of Statistical 
+          Software, Code Snippets, 76(1), 1-19. doi:10.18637/jss.v076.c01")),
+    div(p("Chang, W., Cheng, J., Allaire, J.J., Xie, Y., & McPherson, J. (2018). 
+          shiny: Web application framework for R. R package version 1.2.0. 
+          https://CRAN.R-project.org/package=shiny")),
+    p(strong("Citation")),
+    div(p(
+      "Aybek, E.C. (2021). catIRT tools: A \"Shiny\" application for item response theory calibration and computerized adaptive testing simulation. Journal of Applied Testing Technology, 22(1). 12-24. ")),
   )
 )
 
